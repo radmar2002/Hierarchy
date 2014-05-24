@@ -33,8 +33,24 @@ path_enum <- setRefClass(
         # Validate path
         validate = function(path) if (!path_exists(path)) stop("path does not exist"),
 
-        # Parent methods
         # TODO: Add ancestors function, in the same way as descendants <-> children
+        # Ancestors methods (get all ancestors)
+        ancestors_ids = function(path) {
+            validate(path)
+            lengthPath<-length(unlist(strsplit(path, split=.sep)))
+            x<-c()
+            for(i in 1:lengthPath){
+                ance <- gsub(sprintf("(^|%s)\\w*$", .sep), "", path)
+                x<-c(x,ance)
+                path <- ance
+            }
+            x <- if (all(x == "")) NULL else sort(unique(x[x != ""]))
+            return(x)
+        },
+        ancestors = function(...) data()[data()[[.path]] %in% ancestors_ids(...), ],
+        has_ancestors = function(path) unlist(sapply(path, function(x) !is.null(ancestors_ids(x)))),
+        
+        # Parent methods
         parent_id = function(path) {
             validate(path)
             x <- gsub(sprintf("(^|%s)\\w*$", .sep), "", path)
